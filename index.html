@@ -142,7 +142,7 @@ const dStr = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"
 const addDays = (s,n) => { const d=dObj(s); d.setDate(d.getDate()+n); return dStr(d); };
 const monthOf = s => s.slice(0,7);
 const cls = v => v>0?"pos":(v<0?"neg":"");
-const sign = v => (v>0?"▲ +":v<0?"▼ −":"") + (v===0?"0":fmt(Math.abs(v)));
+const sign = v => (v>0?"▲ ":v<0?"▼ ":"") + (v===0?"0":fmt(Math.abs(v)));
 
 /* ---------- 데이터 인덱스 ---------- */
 // 일별 생산 집계
