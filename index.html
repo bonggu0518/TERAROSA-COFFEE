@@ -135,7 +135,7 @@ const DATA={"prod":[["2026-01-02","올데이 블렌드","블렌드",1736.0,1460.
 const KDOW = ["일","월","화","수","목","금","토"];
 const fmt = (n, d=1) => n==null ? "-" : Number(n.toFixed(d)).toLocaleString("ko-KR", {minimumFractionDigits:0, maximumFractionDigits:d});
 const fmtInt = n => n==null ? "-" : Math.round(n).toLocaleString("ko-KR");
-const pct = n => n==null ? "-" : (n>0?"+":"") + (n*100).toFixed(1) + "%";
+const pct = n => n==null ? "-" : (n>0?"▲ ":n<0?"▼ ":"") + Math.abs(n*100).toFixed(1) + "%";
 const ton = kg => kg/1000;
 const dObj = s => new Date(s+"T00:00:00");
 const dStr = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
@@ -189,7 +189,7 @@ function metrics(sel){
   let staffDays=0, staffSum=0;
   for(const d in DATA.staff){ if(d>=mStart&&d<=sel){staffDays++; staffSum+=DATA.staff[d];} }
   return {day,week,prevWeek,mtd,pMtd,ytd,
-    dayPrev: daily[prevD]? daily[prevD].out : null,
+    dayPrev: prevD>=prodDates[0] ? (daily[prevD]? daily[prevD].out : 0) : null,
     avgMonth: ytd/monthsElapsed/1000,
     yB: bIn>0? bOut/bIn:null, yS: sIn>0? sOut/sIn:null,
     yBd: day.bIn>0? day.bOut/day.bIn:null, ySd: day.sIn>0? day.sOut/day.sIn:null,
