@@ -269,7 +269,7 @@ function renderDash(){
   let h="";
   // 01 로스팅 생산량
   h+=`<section class="blk"><h2><span class="no">01</span>로스팅 생산량 <small>일간 · 주간 · 월간 · 연간</small></h2><div class="cards c4">`
-    + card("금일 생산량", fmt(ton(mt.day.out)), "톤", mt.dayPrev==null?"전일대비 −":`전일대비 <span class="${cls(mt.day.out-mt.dayPrev)}">${sign(ton(mt.day.out-mt.dayPrev))}톤</span>`)
+    + card("일 생산량", fmt(ton(mt.day.out)), "톤", mt.dayPrev==null?"전일대비 −":`전일대비 <span class="${cls(mt.day.out-mt.dayPrev)}">${sign(ton(mt.day.out-mt.dayPrev))}톤</span>`)
     + card("주간 생산량", fmt(ton(mt.week)), "톤", mt.prevWeek>0?`전주대비 <span class="${cls(mt.week-mt.prevWeek)}">${pct(rt(mt.week)/rt(mt.prevWeek)-1)}</span>`:"전주대비 −")
     + card("월간 누적 (MTD)", fmt(ton(mt.mtd)), "톤", mt.pMtd>0?`전월대비 <span class="${cls(mt.mtd-mt.pMtd)}">${pct(rt(mt.mtd)/rt(mt.pMtd)-1)}</span>`:"전월대비 −")
     + card("연간 누적 (YTD)", fmt(ton(mt.ytd),0), "톤", "월평균 "+fmt(mt.avgMonth)+"톤")
@@ -375,15 +375,15 @@ function renderProd(){
   const row=(n,a,c="",g="")=>`<tr class="${c}"><td class="l">${g}</td><td class="l">${n}</td><td>${fmt(ton(a.d),2)}</td><td>${fmt(ton(a.w),2)}</td><td>${fmt(ton(a.m),2)}</td><td><b>${fmt(ton(a.y),2)}</b></td></tr>`;
   let h=`<section class="blk"><h2>로스팅 생산량 상세 <small>제품별 · ${SEL} 기준</small></h2>
     <div class="cards c4" style="margin-bottom:18px">`
-    + card("금일", fmt(ton(mt.day.out)),"톤") + card("주간", fmt(ton(mt.week)),"톤")
+    + card("일", fmt(ton(mt.day.out)),"톤") + card("주간", fmt(ton(mt.week)),"톤")
     + card("월간 MTD", fmt(ton(mt.mtd)),"톤") + card("연간 YTD", fmt(ton(mt.ytd),0),"톤")+`</div>`;
   h+=`<div class="cards c4" style="margin-bottom:18px">`
-    + card("블렌드 수율 (금일)", mt.yBd!=null?(mt.yBd*100).toFixed(1):"−","%")
+    + card("블렌드 수율 (일)", mt.yBd!=null?(mt.yBd*100).toFixed(1):"−","%")
     + card("블렌드 수율 (MTD)", mt.yB!=null?(mt.yB*100).toFixed(1):"−","%")
-    + card("싱글 수율 (금일)", mt.ySd!=null?(mt.ySd*100).toFixed(1):"−","%")
+    + card("싱글 수율 (일)", mt.ySd!=null?(mt.ySd*100).toFixed(1):"−","%")
     + card("싱글 수율 (MTD)", mt.yS!=null?(mt.yS*100).toFixed(1):"−","%")+`</div>`;
   h+=`<h3>제품별 생산량 집계 (톤 · 구분별 연간 YTD 내림차순)</h3>
-    <div class="scroll tall"><table><thead><tr><th>구분</th><th class="l">제품명칭</th><th>금일</th><th>주간</th><th>월간 MTD</th><th>연간 YTD ▼</th></tr></thead><tbody>`
+    <div class="scroll tall"><table><thead><tr><th>구분</th><th class="l">제품명칭</th><th>일</th><th>주간</th><th>월간 MTD</th><th>연간 YTD ▼</th></tr></thead><tbody>`
     + row("합계 (로스팅 원두)", {d:bs.d+ss.d,w:bs.w+ss.w,m:bs.m+ss.m,y:bs.y+ss.y}, "total", "전체")
     + row("소계", bs, "subtotal", "블렌드") + bl.map(([n,a],i)=>row(n,a,"", i===0?"블렌드":"")).join("")
     + row("소계", ss, "subtotal", "싱글 오리진") + sg.map(([n,a],i)=>row(n,a,"", i===0?"싱글 오리진":"")).join("")
