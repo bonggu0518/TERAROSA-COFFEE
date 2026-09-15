@@ -36,7 +36,7 @@
     border:1px solid #4a3c31;background:#332720;color:#f2ede6}
   .datebar button:hover,.datebar select:hover{background:#40332a}
   .datebar .dow{font-size:.95rem;color:#f2ede6;font-weight:600;margin-left:2px}
-  .datebar .range{font-size:.75rem;color:#9a8d7e;margin-left:auto}
+  .range{font-size:.75rem;color:#9a8d7e;white-space:nowrap}
 
   nav{display:flex;gap:2px;margin-top:16px;overflow-x:auto}
   nav button{
@@ -102,7 +102,7 @@
     .split{grid-template-columns:1fr}
     .card .value{font-size:1.35rem}
     header h1{font-size:1.15rem}
-    .datebar .range{display:none}
+    .range{font-size:.7rem}
     .bar-row{grid-template-columns:72px 1fr 110px}
   }
 </style>
@@ -126,8 +126,8 @@
       <span class="dow" id="dowLabel"></span>
       <button id="btnPrev" title="이전일">◀ 전일</button>
       <button id="btnNext" title="다음일">익일 ▶</button>
-      <span class="range" id="rangeLabel"></span>
     </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 16px">
     <nav id="tabs">
       <button data-tab="dash" class="on">종합 Dashboard</button>
       <button data-tab="prod">1. 생산량 상세</button>
@@ -136,6 +136,8 @@
       <button data-tab="util">4. 유틸리티</button>
       <button data-tab="claim">5. 클레임·안전</button>
     </nav>
+    <span class="range" id="rangeLabel"></span>
+    </div>
   </div>
 </header>
 
