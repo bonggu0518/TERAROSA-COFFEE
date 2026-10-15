@@ -186,6 +186,26 @@ const MIN_D = allDates[0], MAX_D = allDates[allDates.length-1];
 const gasMap = Object.fromEntries(DATA.gas.map(g=>[g[0],{f:g[1],r:g[2],t:g[3]}]));
 const elecMap = Object.fromEntries(DATA.elec.map(e=>[e[0],e[1]]));
 
+// 제품별 고정 색상 매핑 - 전체기간 누적생산량 기준 순위로 색상을 고정 배정하여
+// 일간/주간/월간 등 어느 차트에서도 동일 제품이 항상 동일한 색상으로 표시되도록 함
+const PRODUCT_PAL=["#2E6DA4","#E67E22","#27AE60","#8E44AD","#C0392B","#a94436","#3d6b8f","#5c7a4e","#8a5a33","#7c5a95","#c08a2e","#4a7a52","#b5566f","#5b7d8f","#8f6b3d","#16A085","#D4AC0D","#2C3E50","#D6336C","#7F8C8D"];
+const PRODUCT_COLOR = (()=>{
+  const tot={};
+  for(const [d,name,gubun,ik,ok] of DATA.prod) tot[name]=(tot[name]||0)+ok;
+  const ranked = Object.keys(tot).sort((a,b)=>tot[b]-tot[a]);
+  const map={};
+  ranked.forEach((n,i)=>{ map[n]=PRODUCT_PAL[i%PRODUCT_PAL.length]; });
+  return map;
+})();
+const DRIP_PRODUCT_COLOR = (()=>{
+  const tot={};
+  for(const [d,name,cat,qty] of DATA.dripProd) tot[name]=(tot[name]||0)+qty;
+  const ranked = Object.keys(tot).sort((a,b)=>tot[b]-tot[a]);
+  const map={};
+  ranked.forEach((n,i)=>{ map[n]=PRODUCT_PAL[i%PRODUCT_PAL.length]; });
+  return map;
+})();
+
 /* ---------- 집계 함수 ---------- */
 const sumRange = (from,to,f) => { let s=0; for(const d in daily){ if(d>=from&&d<=to) s+=f(daily[d]); } return s; };
 const rt = kg => Math.round(kg/100)*100; // 엑셀과 동일: 0.1톤 단위 반올림 후 비교
@@ -337,7 +357,7 @@ function renderDash(){
     const top = list.slice(0,5), etc = list.slice(5);
     const etcBlend = etc.filter(([n,a])=>a.gubun==="블렌드").reduce((s,[n,a])=>s+a[key],0);
     const etcSingle = etc.filter(([n,a])=>a.gubun!=="블렌드").reduce((s,[n,a])=>s+a[key],0);
-    const items = top.map(([n,a],i)=>({name:n, value:a[key], vLabel:fmt(ton(a[key]),2)+"톤", color:DONUT_PAL[i%DONUT_PAL.length]}));
+    const items = top.map(([n,a],i)=>({name:n, value:a[key], vLabel:fmt(ton(a[key]),2)+"톤", color:PRODUCT_COLOR[n]||DONUT_PAL[i%DONUT_PAL.length]}));
     if(etcBlend>0) items.push({name:"블렌드 기타", value:etcBlend, vLabel:fmt(ton(etcBlend),2)+"톤", color:ETC_BLEND_COLOR});
     if(etcSingle>0) items.push({name:"싱글오리진 기타", value:etcSingle, vLabel:fmt(ton(etcSingle),2)+"톤", color:ETC_SINGLE_COLOR});
     return items;
@@ -650,7 +670,7 @@ function renderTrend(){
   }
   const dProdLines = TREND_D_PRODS.filter(n=>names[n]).map((n,i)=>{
     const vals=[]; for(let i2=1;i2<=lastDay;i2++){ const ds=TREND_M+"-"+String(i2).padStart(2,"0"); vals.push((byDayProd[ds]&&byDayProd[ds][n])||0); }
-    return {n, vals, color:PAL[i%PAL.length]};
+    return {n, vals, color:PRODUCT_COLOR[n]||PAL[i%PAL.length]};
   });
   const mLabels=monthsAll.map(m=>+m.slice(5)+"월");
   const mAll=monthsAll.map(m=>byMonth[m]?byMonth[m].all:0);
@@ -786,7 +806,7 @@ function renderTrendDrip(){
   }
   const dProdLines = DTREND_D_PRODS.filter(n=>names[n]).map((n,i)=>{
     const vals=[]; for(let i2=1;i2<=lastDay;i2++){ const ds=DTREND_M+"-"+String(i2).padStart(2,"0"); vals.push((byDayProd[ds]&&byDayProd[ds][n])||0); }
-    return {n, vals, color:PAL[i%PAL.length]};
+    return {n, vals, color:DRIP_PRODUCT_COLOR[n]||PAL[i%PAL.length]};
   });
   const mLabels=monthsAll.map(m=>+m.slice(5)+"월");
   const mAll=monthsAll.map(m=>byMonth[m]?byMonth[m].all:0);
