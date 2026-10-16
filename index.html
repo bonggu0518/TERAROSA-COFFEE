@@ -188,7 +188,22 @@ const elecMap = Object.fromEntries(DATA.elec.map(e=>[e[0],e[1]]));
 
 // 제품별 고정 색상 매핑 - 전체기간 누적생산량 기준 순위로 색상을 고정 배정하여
 // 일간/주간/월간 등 어느 차트에서도 동일 제품이 항상 동일한 색상으로 표시되도록 함
-const PRODUCT_PAL=["#2E6DA4","#E67E22","#27AE60","#8E44AD","#C0392B","#a94436","#3d6b8f","#5c7a4e","#8a5a33","#7c5a95","#c08a2e","#4a7a52","#b5566f","#5b7d8f","#8f6b3d","#16A085","#D4AC0D","#2C3E50","#D6336C","#7F8C8D"];
+const PRODUCT_PAL=(()=>{
+  // 상위권 제품은 보기 좋은 수작업 색상 20종을 그대로 사용하고,
+  // 그 이후 제품은 황금각(137.508°) 회전으로 색상을 자동 생성해
+  // 제품 수가 많아져도(60여종) 서로 다른 제품끼리 색이 겹치지 않도록 함
+  const base=["#2E6DA4","#E67E22","#27AE60","#8E44AD","#C0392B","#a94436","#3d6b8f","#5c7a4e","#8a5a33","#7c5a95","#c08a2e","#4a7a52","#b5566f","#5b7d8f","#8f6b3d","#16A085","#D4AC0D","#2C3E50","#D6336C","#7F8C8D"];
+  const pal=[...base];
+  const NEED=100;
+  let hue=41;
+  while(pal.length<NEED){
+    hue=(hue+137.508)%360;
+    const sat=42+(pal.length%3)*8;
+    const light=38+(pal.length%4)*6;
+    pal.push(`hsl(${hue.toFixed(1)},${sat}%,${light}%)`);
+  }
+  return pal;
+})();
 const PRODUCT_COLOR = (()=>{
   const tot={};
   for(const [d,name,gubun,ik,ok] of DATA.prod) tot[name]=(tot[name]||0)+ok;
