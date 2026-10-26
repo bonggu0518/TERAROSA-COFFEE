@@ -370,6 +370,7 @@ const M = document.getElementById("main");
 const card=(label,val,unit,sub,valCls="")=>`<div class="card"><div class="label">${label}</div><div class="value ${valCls}">${val}<span class="unit">${unit||""}</span></div><div class="sub">${sub||""}</div></div>`;
 
 let INV_TREND_PERIOD="30";
+const WH_MAX_TON = 400; // 생두창고 최대 보관량(톤) - 재고 추이 그래프 기준선 및 적재율 계산 기준
 function renderDash(){
   const mt=metrics(SEL), iv=invAgg(SEL), ut=utilMtd(SEL);
   let h="";
@@ -426,11 +427,13 @@ function renderDash(){
   // 04 생두재고
   h+=`<section class="blk"><h2><span class="no">04</span>생두 재고 현황 <small>당일 수치 · 추이</small></h2>`;
   if(iv){
-    h+=`<div class="cards c4">`
+    const fillRate = ton(iv.tot)/WH_MAX_TON, spare = WH_MAX_TON-ton(iv.tot);
+    h+=`<div class="cards c5">`
       + card("당일 총 재고량", fmt(ton(iv.tot)),"톤")
       + card("전일대비", sign(ton(iv.tot-iv.prev)),"톤","",cls(iv.tot-iv.prev))
       + card("보유 원산지", iv.list.filter(x=>x.t>0).length,"개국")
       + card("품종", iv.varieties,"종")
+      + card("창고 적재율", fmt(fillRate*100,0),"%", spare>=0?`최대 ${WH_MAX_TON}톤 대비 · 여유 ${fmt(spare)}톤`:`최대 ${WH_MAX_TON}톤 <span class="neg">초과 ${fmt(-spare)}톤</span>`, spare<0?"neg":"")
       + `</div>`;
 
     if(!INV_TREND_PERIOD) INV_TREND_PERIOD="30";
@@ -463,7 +466,7 @@ function renderDash(){
     </div>`;
     h+=`<div style="display:grid;gap:16px;margin-top:10px">
       <div class="panel"><h3>전체 재고량 추이 (톤) <small style="font-weight:400;color:var(--ink-soft)">${periodLabel} · ${SEL} 기준</small></h3>`
-      + svgChart(thinLabels(pLabels),[],[{vals:totalVals,color:"#2E6DA4",name:"총재고"}],false,1000,1,selIdx>=0?selIdx:null,"톤","",pLabels,250,450)
+      + svgChart(thinLabels(pLabels),[],[{vals:totalVals,color:"#2E6DA4",name:"총재고"}],false,1000,1,selIdx>=0?selIdx:null,"톤","",pLabels,250,450,{value:WH_MAX_TON,label:`최대 보관량 ${WH_MAX_TON}톤`,color:"#a94436"})
       + `</div>
       <div class="panel"><h3>원산지별 재고 비중 추이 (톤)</h3>`
       + legend(areaSeries.map(s=>({n:s.name,c:s.color})))
@@ -625,7 +628,7 @@ let TREND_P=null, TREND_M=null, TREND_D_PRODS=[], TREND_D_OPEN=false, TREND_D_TO
 let DTREND_P=null, DTREND_M=null, DTREND_D_PRODS=[], DTREND_D_OPEN=false, DTREND_D_TOUCHED=false;
 function niceCeil(v){ if(v<=0) return 1; const p=Math.pow(10,Math.floor(Math.log10(v))); const f=v/p;
   const nf = f<=1?1: f<=2?2: f<=4?4: f<=5?5: f<=8?8: 10; return nf*p; }
-function svgChart(labels, bars, lines, showVals, scale, decimals, selIndex, unit, xSuffix, tipLabels, yMin, yMax){
+function svgChart(labels, bars, lines, showVals, scale, decimals, selIndex, unit, xSuffix, tipLabels, yMin, yMax, refLine){
   scale = scale||1000; decimals = decimals==null?1:decimals; selIndex = selIndex==null?-1:selIndex; unit = unit||"톤";
   tipLabels = tipLabels || labels; // 축 라벨을 일부만 표시(thinLabels)해도 팝업에는 항상 전체 날짜가 보이도록
   const n=labels.length, step=n<=12? 68: 30;
@@ -648,6 +651,12 @@ function svgChart(labels, bars, lines, showVals, scale, decimals, selIndex, unit
     const gVal=minV+g*vRange;
     s+=`<line x1="${padL}" y1="${gy}" x2="${W-padR}" y2="${gy}" stroke="${g===0?"#d8d2c8":"#e9e5dd"}" stroke-width="1"/>`;
     s+=`<text x="${padL-6}" y="${gy+3.5}" font-size="10" fill="#6b5d52" text-anchor="end">${fmtFixed(gVal/scale,decimals)}</text>`;
+  }
+  // 기준선(예: 창고 최대 보관량) - refLine={value(unit 단위),label,color}
+  if(refLine && refLine.value*scale>=minV && refLine.value*scale<=maxV){
+    const ry=y(refLine.value*scale), rc=refLine.color||"#a94436";
+    s+=`<line x1="${padL}" y1="${ry}" x2="${W-padR}" y2="${ry}" stroke="${rc}" stroke-width="1.5" stroke-dasharray="6 4"/>`;
+    s+=`<text x="${W-padR-2}" y="${ry-5}" font-size="10.5" font-weight="700" fill="${rc}" text-anchor="end">${refLine.label}</text>`;
   }
   const tipEsc = s2 => String(s2).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
   const tipText = (lb,name,v) => tipEsc(`${lb}${xSuffix||""}${name?" · "+name:""}: ${fmtFixed(v/scale,decimals+1)}${unit}`);
